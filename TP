@@ -1,0 +1,71 @@
+const fs = require('fs');
+const usuariosArchivo = 'usuarios.json';
+
+// Constructor de Usuario
+function Usuario(nombre, correoElectronico) {
+  this.nombre = nombre;
+  this.correoElectronico = correoElectronico;
+}
+
+// Método para registrar un usuario en el archivo usuarios.json
+Usuario.prototype.registrar = function () {
+  const usuario = {
+    nombre: this.nombre,
+    correoElectronico: this.correoElectronico,
+  };
+
+  fs.readFile(usuariosArchivo, 'utf8', (err, data) => {
+    if (err) {
+      // Si el archivo no existe, lo creamos con el primer usuario
+      const usuarios = [usuario];
+      fs.writeFile(usuariosArchivo, JSON.stringify(usuarios, null, 2), (err) => {
+        if (err) {
+          console.error('Error al registrar usuario.');
+        } else {
+          console.log('Usuario registrado con éxito.');
+        }
+      });
+    } else {
+      // Si el archivo existe, leemos su contenido y agregamos el nuevo usuario
+      const usuarios = JSON.parse(data);
+      usuarios.push(usuario);
+      fs.writeFile(usuariosArchivo, JSON.stringify(usuarios, null, 2), (err) => {
+        if (err) {
+          console.error('Error al registrar usuario.');
+        } else {
+          console.log('Usuario registrado con éxito.');
+        }
+      });
+    }
+  });
+};
+
+// Función para listar usuarios
+function listarUsuarios() {
+  fs.readFile(usuariosArchivo, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error al leer usuarios.');
+    } else {
+      const usuarios = JSON.parse(data);
+      console.log('Usuarios registrados:');
+      usuarios.forEach((usuario, index) => {
+        console.log(`${index + 1}. Nombre: ${usuario.nombre}, Correo Electrónico: ${usuario.correoElectronico}`);
+      });
+    }
+  });
+}
+
+// Verificar si se proporcionaron los argumentos de línea de comandos
+if (process.argv.length < 4) {
+  console.log('Uso: node registroUsuarios.js <nombre> <correoElectrónico>');
+} else {
+  const nombre = process.argv[2];
+  const correoElectronico = process.argv[3];
+
+  // Crear una instancia de Usuario y registrar al usuario
+  const nuevoUsuario = new Usuario(nombre, correoElectronico);
+  nuevoUsuario.registrar();
+
+  // Listar usuarios registrados
+  listarUsuarios();
+}
